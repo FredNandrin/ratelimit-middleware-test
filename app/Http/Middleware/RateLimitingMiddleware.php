@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\RateLimiting\Exception\RateLimitExceededException;
 use App\Services\RateLimiting\RateLimitingAlgorithm;
 use Closure;
 use Illuminate\Http\Request;
@@ -15,11 +16,7 @@ readonly class RateLimitingMiddleware
     }
 
     /**
-     * Handle an incoming request.
-     *
-     * @param \Closure(Request): (Response) $next
-     *
-     * @throws \App\Services\RateLimiting\Exception\RateLimitExceededException
+     * @throws RateLimitExceededException
      */
     final public function handle(Request $request, Closure $next): Response
     {
@@ -28,9 +25,8 @@ readonly class RateLimitingMiddleware
         $requestsLeft = $this->algorithm->recordRequest($token);
 
         if ($requestsLeft <= 0) {
-            throw new \App\Services\RateLimiting\Exception\RateLimitExceededException();
+            throw new RateLimitExceededException();
         }
-        return new \Illuminate\Http\Response($requestsLeft);
         return $next($request);
     }
 }

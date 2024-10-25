@@ -23,8 +23,8 @@ readonly class RateLimitingMiddleware
         $token = $request->get('token', $request->getClientIp());
 
         $requestsLeft = $this->algorithm->recordRequest($token);
-
         if ($requestsLeft <= 0) {
+            // only thrown in very specific racing conditions
             throw new RateLimitExceededException();
         }
         return $next($request);
